@@ -20,15 +20,17 @@ git_add(".", repo = local_dir)
 git_commit("Initial commit", repo = local_dir)
 
 # Authenticate with GitHub (you might need to set up a personal access token)
-gh::gh_whoami()
+(gh_data <- gh::gh_whoami())
+gh_username <- gh_data$login
 
 # Create a new repository on GitHub
-repo_name <- "your-new-repo"
 gh::gh("POST /user/repos", name = repo_name)
 
 # Set the remote URL
-remote_url <- paste0("https://github.com/your-username/", repo_name, ".git")
+(remote_url <- paste0("https://github.com/", gh_username, "/", repo_name, ".git"))
 git_remote_add("origin", remote_url, repo = local_dir)
+# git remote add origin https://github.com/johngavin/blogs.git
+
 
 # Push the local repository to GitHub
 git_push(remote = "origin", repo = local_dir)
