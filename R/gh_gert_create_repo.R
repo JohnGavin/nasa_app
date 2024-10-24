@@ -4,8 +4,11 @@
 library(gert)
 library(gh)
 
+repo_name <- "nasa_app"
 # INPUT local directory
-local_dir <- "~/docs_gh/nasa_app"
+local_dir <- paste0(
+  "~/docs_gh/", repo_name
+)
 
 # Initialize local Git repository
 git_init(local_dir)
