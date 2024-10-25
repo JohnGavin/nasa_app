@@ -29,10 +29,17 @@ jobs:
 
     - name: Install dependencies
       run: |
-        Rscript -e 'install.packages(c("shiny", "httr", "jsonlite"))'
+        Rscript -e 'install.packages(c("shiny", "httr", "jsonlite", "rsconnect"))'
+      # TODO: daily run command?
+
+    # - name: Deploy to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: ./nasa_app
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./nasa_app
+      run: |
+        Rscript -e 'rsconnect::deployApp(appDir = ".", appFiles = c("app.R"), appName = "nasa_app", account = "JohnGavin")'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
