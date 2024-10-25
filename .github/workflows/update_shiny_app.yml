@@ -29,7 +29,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        Rscript -e 'install.packages(c("shiny", "httr", "jsonlite", "rsconnect"))'
+        Rscript -e 'install.packages(c("shiny", "httr", "jsonlite", "rsconnect", "curl"), dependencies = TRUE)'
       # TODO: daily run command?
 
     # - name: Deploy to GitHub Pages
