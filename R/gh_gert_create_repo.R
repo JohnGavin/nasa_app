@@ -17,7 +17,7 @@ git_init(local_dir)
 git_add(".", repo = local_dir)
 
 # Commit the changes
-git_commit("Initial commit", repo = local_dir)
+git_commit("added caching", repo = local_dir)
 
 # Authenticate with GitHub (you might need to set up a personal access token)
 (gh_data <- gh::gh_whoami())
