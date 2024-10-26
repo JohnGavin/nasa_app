@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      # url: ${{ secrets.GITHUB_SERVER_URL }}/$GITHUB_REPOSITORY
+      url: ${{ secrets.GITHUB_SERVER_URL }}/$GITHUB_REPOSITORY
+      deployment_branch: main # Add this line to specify the branch
     concurrency:
       group: r-shinylive-website-${{ github.event_name != 'pull_request' || github.run_id }}
     permissions:
