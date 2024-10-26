@@ -12,7 +12,8 @@ name: demo-r-shinylive-app
 jobs:
     demo-website:
       runs-on: ubuntu-latest
-      environment: production  # Define the environment here
+      environment:
+        name: github-pages
       # Only restrict concurrency for non-PR jobs
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
