@@ -13,6 +13,8 @@ jobs:
     demo-website:
       runs-on: ubuntu-latest
       # Only restrict concurrency for non-PR jobs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       concurrency:
         group: r-shinylive-website-${{ github.event_name != 'pull_request' || github.run_id }}
       # Describe the permissions for obtain repository contents and
@@ -58,6 +60,8 @@ jobs:
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v2
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
 
 # name: Update and Deploy Shiny App
 
