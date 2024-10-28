@@ -33,6 +33,8 @@ jobs:
           packages:
             any::shiny
             any::httpuv
+            any::httr
+            any::jsonlite
       - name: Serve Shiny app
         run: |
           Rscript -e "
@@ -40,6 +42,13 @@ jobs:
             app <- shinyApp(ui = ui, server = server)
             runApp(app, port = 80, host = '0.0.0.0')
           "
+        shell: /usr/bin/bash -e {0}
+        env:
+          R_LIBS_USER: /home/runner/work/_temp/Library
+          TZ: UTC
+          R_CHECK_SYSTEM_CLOCK_: FALSE
+          NOT_CRAN: true
+          R_LIB_FOR_PAK: /opt/R/4.4.1/lib/R/site-library
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload Pages artifact
