@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Shinylive CLI
         run: |
-          R -e 'shinylive::install()'
+          R -e 'pak::pak("posit-dev/r-shinylive")'
 
       - name: Create _site directory
         run: mkdir -p _site
