@@ -36,49 +36,41 @@ jobs:
             any::httpuv
             any::httr
             any::jsonlite
-            any::rsconnect
 
-      - name: Create static files directory
-        run: mkdir -p _site
-
-      - name: Generate static version
+      - name: Create static files
         run: |
-          Rscript -e "
-          library(shiny)
-          library(rsconnect)
-          source('app.R')
-
-          # Create index.html with necessary dependencies
-          staticPath <- '_site'
-          dir.create(staticPath, showWarnings = FALSE)
-
-          # Write a basic HTML file that will load your app
-          writeLines(
-            sprintf('
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>NASA APOD Viewer</title>
-              <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-              <script src="https://cdn.jsdelivr.net/npm/shiny@1.7.1/dist/shiny.min.js"></script>
-              <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/shiny@1.7.1/dist/shiny.min.css"/>
-            </head>
-            <body>
-              <div id=\"shiny-app\"></div>
-              <script>
-                $(document).ready(function() {
-                  window.app = new Shiny.App(\"shiny-app\");
+          mkdir -p _site
+          cp app.R _site/
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>NASA APOD Viewer</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/shiny/1.7.1/shiny.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shiny/1.7.1/shiny.min.css"/>
+            <style>
+              body { margin: 20px; }
+              .container { max-width: 1200px; margin: 0 auto; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div id="shiny-app"></div>
+            </div>
+            <script>
+              window.addEventListener('load', function() {
+                const app = new Shiny.App({
+                  container: "#shiny-app",
+                  debug: true
                 });
-              </script>
-            </body>
-            </html>
-            '),
-            file.path(staticPath, 'index.html')
-          )
-
-          # Copy necessary app files
-          file.copy('app.R', file.path(staticPath, 'app.R'), overwrite = TRUE)
-          "
+              });
+            </script>
+          </body>
+          </html>
+          EOF
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
