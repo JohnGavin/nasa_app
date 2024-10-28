@@ -3,7 +3,7 @@ name: demo-r-shinylive-app
 on:
   push:
     branches:
-      - main    # or master, depending on your default branch
+      - main
   release:
     types: [published]
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  deployments: write  # Added deployment permission
+  deployments: write
 
 # Allow only one concurrent deployment
 concurrency:
@@ -32,12 +32,40 @@ jobs:
       - name: Setup R dependency for Shinylive App export
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: cran::shinylive
+          packages: |
+            any::shinylive
+            any::httpuv
+            any::later
+            any::promises
+
+      # Debug step to check directory structure
+      - name: List files
+        run: |
+          ls -la
+          pwd
 
       - name: Create Shinylive App from working directory files
         shell: Rscript {0}
         run: |
-          shinylive::export(".", "_site")
+          # Print working directory and files for debugging
+          print(getwd())
+          print(list.files(recursive = TRUE))
+
+          # Make sure app.R exists in the correct location
+          if (!file.exists("app.R")) {
+            stop("app.R not found in working directory")
+          }
+
+          # Export with explicit base URL for GitHub Pages
+          shinylive::export(
+            appdir = ".",
+            destdir = "_site",
+            subdir = "nasa_app"  # Match your repo name
+          )
+
+          # Verify export
+          print("Export completed. Checking _site directory:")
+          print(list.files("_site", recursive = TRUE))
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -51,8 +79,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
-    # Specify environment with deployment review
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
