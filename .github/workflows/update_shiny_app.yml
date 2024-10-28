@@ -25,55 +25,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
-
-      - name: Setup R dependency for Shinylive App export
+      - name: Setup R dependency for Shiny App
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: |
-            any::shinylive
+          packages:
+            any::shiny
             any::httpuv
-            any::later
-            any::promises
-
-      # Debug step to check directory structure
-      - name: List files
+      - name: Serve Shiny app
         run: |
-          ls -la
-          pwd
-
-      - name: Create Shinylive App from working directory files
-        shell: Rscript {0}
-        run: |
-          # Print working directory and files for debugging
-          print(getwd())
-          print(list.files(recursive = TRUE))
-
-          # Make sure app.R exists in the correct location
-          if (!file.exists("app.R")) {
-            stop("app.R not found in working directory")
-          }
-
-          # Export with explicit base URL for GitHub Pages
-          shinylive::export(
-            appdir = ".",
-            destdir = "_site",
-            subdir = "nasa_app"  # Match your repo name
-          )
-
-          # Verify export
-          print("Export completed. Checking _site directory:")
-          print(list.files("_site", recursive = TRUE))
-
+          Rscript -e "
+            source('app.R')
+            app <- shinyApp(ui = ui, server = server)
+            runApp(app, port = 80, host = '0.0.0.0')
+          "
       - name: Setup Pages
         uses: actions/configure-pages@v4
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: _site
+          path: .
           retention-days: 1
 
   deploy:
@@ -82,7 +54,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
