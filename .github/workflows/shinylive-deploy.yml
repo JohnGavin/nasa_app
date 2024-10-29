@@ -34,8 +34,6 @@ jobs:
             any::shiny
             any::shinylive
             any::httpuv
-            any::httr
-            any::jsonlite
 
       - name: Install Shinylive CLI
         run: |
@@ -44,9 +42,12 @@ jobs:
       - name: Create _site directory
         run: mkdir -p _site
 
+      - name: Clean previous export
+        run: rm -rf _site/*
+
       - name: Export Shinylive app
         run: |
-          R -e 'shinylive::export("app", "_site") ;  httpuv::runStaticServer("_site") '
+          R -e 'shinylive::export(".", "_site")'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2

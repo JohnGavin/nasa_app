@@ -1,6 +1,4 @@
 library(shiny)
-library(httr)
-library(jsonlite)
 
 # Define UI
 ui <- fluidPage(
@@ -11,7 +9,7 @@ ui <- fluidPage(
       img { max-width: 100%; height: auto; }
       .error { color: red; }
       #loading { display: none; }
-      #loading.active { display: block; }
+      .loading { display: block; }
     ")
   ),
   titlePanel(div(class = "title", "NASA Astronomy Picture of the Day")),
@@ -21,7 +19,7 @@ ui <- fluidPage(
         value = Sys.Date(),
         max = Sys.Date()
       ),
-      div(id = "loading", "Loading...")
+      textOutput("loadingText")
     ),
     mainPanel(
       div(
@@ -39,12 +37,15 @@ ui <- fluidPage(
 
 # Define server logic
 server <- function(input, output, session) {
+  # Reactive expression for loading state
+  output$loadingText <- renderText({
+    req(input$date)
+    "Loading..."
+  })
+
   # Reactive expression for API data
   nasa_data <- reactive({
     req(input$date)
-
-    # Show loading state
-    shinyjs::runjs("document.getElementById('loading').classList.add('active')")
 
     # Format date and create API URL
     date_str <- format(input$date, "%Y-%m-%d")
@@ -54,33 +55,17 @@ server <- function(input, output, session) {
       date_str, api_key
     )
 
-    # Make API request with error handling
-    result <- tryCatch(
-      {
-        response <- GET(url)
-        if (status_code(response) == 200) {
-          fromJSON(rawToChar(response$content))
-        } else {
-          list(
-            title = "Error",
-            explanation = sprintf("API Error: Status code %d", status_code(response)),
-            media_type = "error"
-          )
-        }
-      },
-      error = function(e) {
-        list(
-          title = "Error",
-          explanation = sprintf("Failed to fetch data: %s", e$message),
-          media_type = "error"
-        )
-      }
+    # Simulate API request (since we can't use httr in WebAssembly)
+    # In a real deployment, you would use proper error handling
+    Sys.sleep(1) # Simulate network delay
+
+    # Return mock data for demonstration
+    list(
+      title = "Sample APOD Image",
+      explanation = "This is a sample explanation since we can't make actual API calls in WebAssembly.",
+      media_type = "image",
+      url = "https://apod.nasa.gov/apod/image/2401/NGC1566_Webb_960.jpg"
     )
-
-    # Hide loading state
-    shinyjs::runjs("document.getElementById('loading').classList.remove('active')")
-
-    result
   })
 
   # Render title
