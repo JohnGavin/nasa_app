@@ -34,7 +34,7 @@ jobs:
 
     - name: Install R dependencies
       run: |
-        install.packages(c('shiny', 'jsonlite'))
+        R -e 'install.packages(c("shiny", "jsonlite"))'
 
     - name: Render Quarto document
       run: quarto render example.qmd
