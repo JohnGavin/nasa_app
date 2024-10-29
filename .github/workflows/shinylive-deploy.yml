@@ -34,7 +34,20 @@ jobs:
 
     - name: Install R dependencies
       run: |
-        R -e 'install.packages(c("knitr", "rmarkdown", "shiny", "jsonlite"))'
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          libcurl4-openssl-dev \
+          libssl-dev \
+          libxml2-dev \
+          libfontconfig1-dev \
+          libharfbuzz-dev \
+          libfribidi-dev \
+          libfreetype6-dev \
+          libpng-dev \
+          libtiff5-dev \
+          libjpeg-dev
+        # sudo apt-get install -y libcurl4-openssl-dev libssl-dev  # Required for curl
+        R -e 'install.packages(c("curl", "knitr", "rmarkdown", "shiny", "jsonlite"), repos="https://cloud.r-project.org")'
 
     - name: Render Quarto document
       run: quarto render example.qmd
