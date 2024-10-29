@@ -39,15 +39,124 @@ jobs:
         run: |
           R -e 'pak::pak("posit-dev/r-shinylive")'
 
-      - name: Create _site directory
-        run: mkdir -p _site
+      - name: Create directories and app file
+        run: |
+          mkdir -p _site
+          mkdir -p app
+          cat > app/app.R << 'EOL'
+          library(shiny)
 
-      - name: Clean previous export
-        run: rm -rf _site/*
+          # Define UI
+          ui <- fluidPage(
+            tags$head(
+              tags$style("
+                .title { margin-bottom: 20px; }
+                .explanation { margin: 20px 0; }
+                img { max-width: 100%; height: auto; }
+                .error { color: red; }
+                #loading { display: none; }
+                .loading { display: block; }
+              ")
+            ),
+
+            titlePanel(div(class = "title", "NASA Astronomy Picture of the Day")),
+
+            sidebarLayout(
+              sidebarPanel(
+                dateInput("date", "Select Date:",
+                  value = Sys.Date(),
+                  max = Sys.Date()
+                ),
+                textOutput("loadingText")
+              ),
+              mainPanel(
+                div(
+                  class = "content",
+                  h3(textOutput("title")),
+                  div(
+                    class = "explanation",
+                    textOutput("explanation")
+                  ),
+                  uiOutput("mediaOutput")
+                )
+              )
+            )
+          )
+
+          # Define server logic
+          server <- function(input, output, session) {
+            # Reactive expression for loading state
+            output$loadingText <- renderText({
+              req(input$date)
+              "Loading..."
+            })
+
+            # Reactive expression for API data
+            nasa_data <- reactive({
+              req(input$date)
+
+              # Format date and create API URL
+              date_str <- format(input$date, "%Y-%m-%d")
+
+              # Return mock data for demonstration
+              list(
+                title = "Sample APOD Image",
+                explanation = "This is a sample explanation since we can't make actual API calls in WebAssembly.",
+                media_type = "image",
+                url = "https://apod.nasa.gov/apod/image/2401/NGC1566_Webb_960.jpg"
+              )
+            })
+
+            # Render title
+            output$title <- renderText({
+              nasa_data()$title
+            })
+
+            # Render explanation
+            output$explanation <- renderText({
+              nasa_data()$explanation
+            })
+
+            # Render media (image or video)
+            output$mediaOutput <- renderUI({
+              data <- nasa_data()
+
+              if (!is.null(data$media_type)) {
+                if (data$media_type == "image") {
+                  tags$img(
+                    src = data$url,
+                    alt = data$title
+                  )
+                } else if (data$media_type == "video") {
+                  tags$iframe(
+                    src = data$url,
+                    width = "100%",
+                    height = "500px",
+                    frameborder = "0",
+                    allowfullscreen = TRUE
+                  )
+                } else {
+                  tags$p(
+                    class = "error",
+                    "Media not available"
+                  )
+                }
+              } else {
+                tags$p(
+                  class = "error",
+                  "No media type specified"
+                )
+              }
+            })
+          }
+
+          # Create Shiny app
+          shinyApp(ui = ui, server = server)
+          EOL
 
       - name: Export Shinylive app
         run: |
-          R -e 'shinylive::export(".", "_site")'
+          R -e 'shinylive::export("app", "_site")'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
